@@ -7,8 +7,8 @@ var Db$ReasonDb = require("./Db.bs.js");
 Future.tapError(Future.tapOk(Db$ReasonDb.add(/* record */[
               /* id */1,
               /* name */"hannibal"
-            ]), (function () {
-            console.log("Stored something!");
+            ], Db$ReasonDb.store), (function (m) {
+            console.log(m);
             return /* () */0;
           })), (function (err) {
         console.log("Something went wrong :(");
