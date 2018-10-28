@@ -30,7 +30,8 @@ module Int = {
 };
 module IntMap = Map.Make(Int);
 let store = IntMap.empty;
-let add = (person: Person.t, store) => {
+type mutatedStore = Future.t(Belt.Result.t(IntMap.t(Js.Json.t), string));
+let add = (person: Person.t, store): mutatedStore => {
   let m = IntMap.add(person.id, Person.encode(person), store);
   Future.value(Belt.Result.Ok(m));
 };
