@@ -1,4 +1,8 @@
-type names =
+open Belt;
+open Decode.ParseError;
+module D = Decode.AsResult.OfParseError;
+
+type colors =
   | Black
   | White;
 
@@ -7,26 +11,23 @@ module Person = {
     id: int,
     name: string,
   };
-  let decode = str => {
-    let json = Json.parseOrRaise(str);
-    Json.Decode.{
-      id: json |> field("id", int),
-      name: json |> field("name", string),
-    };
-  };
+  let make = (id, name) => {id, name};
+  let decode = json: Result.t(t, Decode.ParseError.failure) =>
+    D.Pipeline.succeed(make)
+    |> D.Pipeline.field("id", D.int)
+    |> D.Pipeline.field("name", D.string)
+    |> D.Pipeline.run(json);
 
-  let encode = person =>
-    Json.Encode.(
-      object_([("id", int(person.id)), ("name", string(person.name))])
-    )
-    ->Json.stringify;
+  let encode = (person): string => Js.Json.stringify(person);
 };
 
 module Color = {
   type t = {
     id: int,
-    name: names,
+    name: colors,
   };
+
+  let make = (id, name) => {id, name};
 
   let colorToStr = color =>
     switch (color) {
@@ -41,22 +42,15 @@ module Color = {
     | _ => Js.Exn.raiseError("Unknown color")
     };
 
-  let decode = str => {
-    let json = Json.parseOrRaise(str);
-    Json.Decode.{
-      id: json |> field("id", int),
-      name: json |> map(strToColor, string),
-    };
-  };
+  let decode = json: Result.t(t, Decode.ParseError.failure) =>
+    D.Pipeline.succeed(make)
+    |> D.Pipeline.field("id", D.int)
+    |> D.Pipeline.field("name", name =>
+         D.string(name)->Result.map(strToColor)
+       )
+    |> D.Pipeline.run(json);
 
-  let encode = color =>
-    Json.Encode.(
-      object_([
-        ("id", color.id->int),
-        ("name", color.name->colorToStr->string),
-      ])
-    )
-    ->Json.stringify;
+  let encode = color => Js.Json.stringify(color);
 };
 
 type schema =
@@ -80,8 +74,7 @@ let add = (s: schema) =>
     Belt.Result.Ok();
   };
 
-let getPerson = (key: int) =>
-  (personStore^)->Belt.Map.Int.getExn(key)->Person.decode->Person;
+let getPerson = (key: int) => (personStore^)->Belt.Map.Int.getExn(key)->Person.decode;
 
 let getColor = (key: int) =>
-  (colorStore^)->Belt.Map.Int.getExn(key)->Color.decode->Color;
+  (colorStore^)->Belt.Map.Int.getExn(key)->Color.decode;
