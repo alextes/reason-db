@@ -14,11 +14,13 @@ module Person = {
   let make = (id, name) => {id, name};
   let decode = json: Result.t(t, Decode.ParseError.failure) =>
     D.Pipeline.succeed(make)
-    |> D.Pipeline.field("id", D.int)
+
+    |> D.Pipeline.field("id", D.intFromNumber)
     |> D.Pipeline.field("name", D.string)
     |> D.Pipeline.run(json);
 
   let encode = (person): string => Js.Json.stringify(person);
+  let encodet = (person:t): string => Js.Json.stringifyAny(person)|>Belt.Option.getExn;
 };
 
 module Color = {
@@ -44,13 +46,14 @@ module Color = {
 
   let decode = json: Result.t(t, Decode.ParseError.failure) =>
     D.Pipeline.succeed(make)
-    |> D.Pipeline.field("id", D.int)
+    |> D.Pipeline.field("id", D.intFromNumber)
     |> D.Pipeline.field("name", name =>
          D.string(name)->Result.map(strToColor)
        )
     |> D.Pipeline.run(json);
 
   let encode = color => Js.Json.stringify(color);
+    let encodet = (color:t): string => Js.Json.stringifyAny(color)|>Belt.Option.getExn;
 };
 
 type schema =
@@ -66,15 +69,15 @@ let add = (s: schema) =>
   switch (s) {
   | Person(p) =>
     let _ =
-      personStore := (personStore^)->Belt.Map.Int.set(p.id, Person.encode(p));
+      personStore := (personStore^)->Belt.Map.Int.set(p.id, Person.encodet(p));
     Belt.Result.Ok();
   | Color(c) =>
     let _ =
-      colorStore := (colorStore^)->Belt.Map.Int.set(c.id, Color.encode(c));
+      colorStore := (colorStore^)->Belt.Map.Int.set(c.id, Color.encodet(c));
     Belt.Result.Ok();
   };
 
-let getPerson = (key: int) => (personStore^)->Belt.Map.Int.getExn(key)->Person.decode;
+let getPerson = (key: int) => (personStore^)->Belt.Map.Int.getExn(key);
 
 let getColor = (key: int) =>
-  (colorStore^)->Belt.Map.Int.getExn(key)->Color.decode;
+  (colorStore^)->Belt.Map.Int.getExn(key);

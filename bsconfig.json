@@ -16,13 +16,8 @@
     "in-source": true
   },
   "suffix": ".bs.js",
-  "bs-dependencies": [
-    "reason-future",
-    "bs-decode"
-  ],
-  "bs-dev-dependencies": [
-    "@glennsl/bs-jest"
-  ],
+  "bs-dependencies": [ "reason-future", "bs-bastet", "bs-decode", "relude" ],
+  "bs-dev-dependencies": [ "@glennsl/bs-jest" ],
   "warnings": {
     "error": "+101"
   },
