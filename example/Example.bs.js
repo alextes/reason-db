@@ -13,13 +13,7 @@ Db$ReasonDb.add({
       _0: me
     });
 
-var getMe = {
-  TAG: /* Person */0,
-  _0: me
-};
-
 console.log(Db$ReasonDb.getPerson(0));
 
 exports.me = me;
-exports.getMe = getMe;
 /*  Not a pure module */
