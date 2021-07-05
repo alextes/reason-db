@@ -4,7 +4,6 @@
 var Curry = require("bs-platform/lib/js/curry.js");
 var Js_exn = require("bs-platform/lib/js/js_exn.js");
 var Belt_MapInt = require("bs-platform/lib/js/belt_MapInt.js");
-var Belt_Option = require("bs-platform/lib/js/belt_Option.js");
 var Belt_Result = require("bs-platform/lib/js/belt_Result.js");
 var Decode_AsResult_OfParseError = require("bs-decode/src/Decode_AsResult_OfParseError.bs.js");
 
@@ -23,15 +22,10 @@ function encode(person) {
   return JSON.stringify(person);
 }
 
-function encodet(person) {
-  return Belt_Option.getExn(JSON.stringify(person));
-}
-
 var Person = {
   make: make,
   decode: decode,
-  encode: encode,
-  encodet: encodet
+  encode: encode
 };
 
 function make$1(id, name) {
@@ -70,17 +64,12 @@ function encode$1(color) {
   return JSON.stringify(color);
 }
 
-function encodet$1(color) {
-  return Belt_Option.getExn(JSON.stringify(color));
-}
-
 var Color = {
   make: make$1,
   colorToStr: colorToStr,
   strToColor: strToColor,
   decode: decode$1,
-  encode: encode$1,
-  encodet: encodet$1
+  encode: encode$1
 };
 
 var personStore = {
@@ -94,14 +83,14 @@ var colorStore = {
 function add(s) {
   if (s.TAG === /* Person */0) {
     var p = s._0;
-    personStore.contents = Belt_MapInt.set(personStore.contents, p.id, Belt_Option.getExn(JSON.stringify(p)));
+    personStore.contents = Belt_MapInt.set(personStore.contents, p.id, p.name);
     return {
             TAG: /* Ok */0,
             _0: undefined
           };
   }
   var c = s._0;
-  colorStore.contents = Belt_MapInt.set(colorStore.contents, c.id, Belt_Option.getExn(JSON.stringify(c)));
+  colorStore.contents = Belt_MapInt.set(colorStore.contents, c.id, c.name ? "white" : "black");
   return {
           TAG: /* Ok */0,
           _0: undefined

@@ -4,15 +4,17 @@
 var Jest = require("@glennsl/bs-jest/src/jest.bs.js");
 var Db$ReasonDb = require("../src/Db.bs.js");
 
-Jest.test("To store a Person", (function (param) {
-        Db$ReasonDb.add({
-              TAG: /* Person */0,
-              _0: {
-                id: 0,
-                name: "alex"
-              }
-            });
-        return Jest.Expect.toEqual(true, Jest.Expect.expect(true));
+Jest.describe("ReasonDb stores a person", (function (param) {
+        return Jest.test("To store a Person", (function (param) {
+                      Db$ReasonDb.add({
+                            TAG: /* Person */0,
+                            _0: {
+                              id: 0,
+                              name: "alex"
+                            }
+                          });
+                      return Jest.Expect.toEqual("alex", Jest.Expect.expect(Db$ReasonDb.getPerson(0)));
+                    }));
       }));
 
 /*  Not a pure module */
