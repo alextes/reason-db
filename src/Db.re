@@ -12,9 +12,9 @@ module Person = {
     name: string,
   };
   let make = (id, name) => {id, name};
-  let decode = json: Result.t(t, Decode.ParseError.failure) =>
+  let decode = (json): Result.t(t, Decode.ParseError.failure) =>
     D.Pipeline.succeed(make)
-    |> D.Pipeline.field("id", D.int)
+    |> D.Pipeline.field("id", D.intFromNumber)
     |> D.Pipeline.field("name", D.string)
     |> D.Pipeline.run(json);
 
@@ -42,9 +42,10 @@ module Color = {
     | _ => Js.Exn.raiseError("Unknown color")
     };
 
-  let decode = json: Result.t(t, Decode.ParseError.failure) =>
+
+  let decode = (json): Result.t(t, Decode.ParseError.failure) =>
     D.Pipeline.succeed(make)
-    |> D.Pipeline.field("id", D.int)
+    |> D.Pipeline.field("id", D.intFromNumber)
     |> D.Pipeline.field("name", name =>
          D.string(name)->Result.map(strToColor)
        )
@@ -65,16 +66,16 @@ let colorStore: store = ref(Belt.Map.Int.empty);
 let add = (s: schema) =>
   switch (s) {
   | Person(p) =>
-    let _ =
-      personStore := (personStore^)->Belt.Map.Int.set(p.id, Person.encode(p));
+    let _ = personStore := (personStore^)->Belt.Map.Int.set(p.id, p.name);
     Belt.Result.Ok();
   | Color(c) =>
     let _ =
-      colorStore := (colorStore^)->Belt.Map.Int.set(c.id, Color.encode(c));
+      colorStore := (colorStore^)->Belt.Map.Int.set(c.id, c.name->Color.colorToStr);
     Belt.Result.Ok();
   };
 
-let getPerson = (key: int) => (personStore^)->Belt.Map.Int.getExn(key)->Person.decode;
+let getPerson = (key: int) =>
+  (personStore^)->Belt.Map.Int.getExn(key);
 
 let getColor = (key: int) =>
-  (colorStore^)->Belt.Map.Int.getExn(key)->Color.decode;
+  (colorStore^)->Belt.Map.Int.getExn(key);
